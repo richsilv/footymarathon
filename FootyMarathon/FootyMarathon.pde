@@ -1,4 +1,5 @@
 JSONObject sprat;
+JSONObject sprLoc;
 boolean[] keys = new boolean[526];
 float[] rots = new float[3];
 
@@ -11,6 +12,7 @@ float plA = 0.0;
 float pldA = 0.3;
 float airRes = 0.0008;
 float groundRes = 0.003;
+float gravity = 0.03;
 int i, j;
 float ballX = 400, ballY = 300, ballH=0, ballA=0;
 float balldX = 0, balldY = 0, balldH = 0, spdSq = 0;
@@ -59,7 +61,7 @@ void draw() {
       ballH = 0;
       balldH *= -0.7;
     }
-    balldH -= 0.05;
+    balldH -= gravity;
     ballA = atan2(balldY, balldX) + PI/2;
     spdSq = sq(balldX) + sq(balldY);
     balldX -= sin(ballA) * spdSq * airRes;
@@ -95,9 +97,12 @@ void draw() {
   rect(piX - 5 - scX, -scY, 5, piY);
   rect(-scX, piY - 5 - scY, piX, 5);
 
-  JSONObject sprLoc = sprat.getJSONObject(str(plD)).getJSONObject(str(int(plA)));
+  sprLoc = sprat.getJSONObject(str(plD)).getJSONObject(str(int(plA)));
+  if (kickTimer > 0) {
+    sprLoc = sprat.getJSONObject(str(plD)).getJSONObject("8");
+  }
   tempSpr = spriteSheet.get(sprLoc.getInt("x")*32, sprLoc.getInt("y")*32, 32, 32);
-  
+
   if (plY < ballY) {
     image(tempSpr, plX - scX, plY - scY, 32, 32);
     pushMatrix();
@@ -135,17 +140,17 @@ void keyReleased()
 }
 
 void checkArea() {
-  if (plX < scX + 100) {
-    scX -= speed*1.5;
+  if (ballX < scX + 100) {
+    scX -= scX - ballX + 100;
   }
-  else if (plX > scX + 400) {
-    scX += speed*1.5;
+  else if (ballX > scX + 400) {
+    scX += ballX - scX - 400;
   }
-  if (plY < scY + 100) {
-    scY -= speed*1.5;
+  if (ballY < scY + 100) {
+    scY -= scY - ballY + 100;
   }
-  else if (plY > scY + 300) {
-    scY += speed*1.5;
+  else if (ballY > scY + 300) {
+    scY += ballY - scY - 300;
   }
   if (plX < 0) {plX = 0;}
   if (plX > piX) {plX = piX;}
@@ -166,13 +171,13 @@ void checkKeys() {
       if (checkKey('a')) {
         if (checkKey('w')) {
           plD = 7;
-          plX -= sqrt(2) * speed;
-          plY -= sqrt(2) * speed;
+          plX -= speed / sqrt(2);
+          plY -= speed / sqrt(2);
         }
         else if (checkKey('s')) {
           plD = 5;
-          plX -= sqrt(2) * speed;
-          plY += sqrt(2) * speed;
+          plX -= speed / sqrt(2);
+          plY += speed / sqrt(2);
         }
         else {
           plD = 6;
@@ -183,13 +188,13 @@ void checkKeys() {
       else if (checkKey('d')) {
         if (checkKey('w')) {
           plD = 1;
-          plX += sqrt(2) * speed;
-          plY -= sqrt(2) * speed;
+          plX += speed / sqrt(2);
+          plY -= speed / sqrt(2);
         }
         else if (checkKey('s')) {
           plD = 3;
-          plX += sqrt(2) * speed;
-          plY += sqrt(2) * speed;
+          plX += speed / sqrt(2);
+          plY += speed / sqrt(2);
         }
         else {
           plD = 2;
